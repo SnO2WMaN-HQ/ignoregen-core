@@ -1,0 +1,21 @@
+# Dependencies
+node_modules/
+
+# Outputs
+dist/
+*.tsbuildinfo
+
+# Test
+coverage/
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+
+# Environment
+.env*
+
+# Vercel
+.vercel
