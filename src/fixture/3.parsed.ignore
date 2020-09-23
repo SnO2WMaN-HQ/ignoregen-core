@@ -1,0 +1,10 @@
+# ignoregen env
+.env*
+.envrc
+!.env.example
+
+dist/
+lib/
+
+# ignoregen node
+node_modules/

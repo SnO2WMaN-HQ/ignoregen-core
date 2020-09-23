@@ -1,0 +1,6 @@
+# ignoregen env
+
+dist/
+lib/
+
+# ignoregen node
