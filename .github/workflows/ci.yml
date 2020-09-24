@@ -3,7 +3,7 @@ name: CI
 on: [push]
 
 jobs:
-  build:
+  install:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -12,9 +12,21 @@ jobs:
           node-version: 12
           check-latest: true
       - run: yarn install --immutable --immutable-cache --check-cache
+
+  build:
+    needs: [install]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2-beta
+        with:
+          node-version: 12
+          check-latest: true
+      - run: yarn install
       - run: yarn build
 
   lint:
+    needs: [install]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -22,10 +34,11 @@ jobs:
         with:
           node-version: 12
           check-latest: true
-      - run: yarn install --immutable --immutable-cache --check-cache
+      - run: yarn install
       - run: yarn lint
 
   test:
+    needs: [install]
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -36,7 +49,7 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
           check-latest: true
-      - run: yarn install --immutable --immutable-cache --check-cache
+      - run: yarn install
       - run: yarn test:ci
       - uses: codecov/codecov-action@v1
         if: ${{ matrix.node }} == 12
