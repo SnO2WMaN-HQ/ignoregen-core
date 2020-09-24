@@ -5,13 +5,13 @@
     "email": "me@sno2wman.dev",
     "name": "SnO2WMaN"
   },
-  "homepage": "https://github.com/SnO2WMaN-HQ/ignoregen#readme",
+  "homepage": "https://github.com/SnO2WMaN-HQ/ignoregen-core#readme",
   "repository": {
     "type": "git",
-    "url": "https://github.com/SnO2WMaN-HQ/ignoregen.git"
+    "url": "https://github.com/SnO2WMaN-HQ/ignoregen-core.git"
   },
   "bugs": {
-    "url": "https://github.com/SnO2WMaN-HQ/ignoregen/issues"
+    "url": "https://github.com/SnO2WMaN-HQ/ignoregen-core/issues"
   },
   "keywords": [
     "ignore"
