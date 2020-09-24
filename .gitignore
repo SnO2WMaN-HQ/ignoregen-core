@@ -3,6 +3,7 @@ node_modules/
 
 # Outputs
 dist/
+lib/
 *.tsbuildinfo
 
 # Test
