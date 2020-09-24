@@ -1,15 +1,43 @@
 {
-  "name": "ignoregen",
+  "name": "@ignoregen/core",
+  "license": "MIT",
+  "author": {
+    "email": "me@sno2wman.dev",
+    "name": "SnO2WMaN"
+  },
+  "homepage": "https://github.com/SnO2WMaN-HQ/ignoregen#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/SnO2WMaN-HQ/ignoregen.git"
+  },
+  "bugs": {
+    "url": "https://github.com/SnO2WMaN-HQ/ignoregen/issues"
+  },
+  "keywords": [
+    "ignore"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "files": [
+    "lib"
+  ],
   "scripts": {
+    "build": "tsc -b tsconfig.build.json",
+    "test": "jest",
+    "test:ci": "jest --ci --runInBand",
+    "test:watch": "jest --watch",
     "lint": "run-s -cn lint:*",
-    "lint:eslint": "eslint . --ext .js,ts",
+    "lint:eslint": "eslint . --ext .js,.ts",
     "lint:prettier": "prettier --check **/*.{json,yml,yaml,md}",
     "fmt": "run-s -cn fmt:*",
     "fmt:eslint": "yarn lint:eslint --fix",
     "fmt:prettier": "yarn lint:prettier --write"
   },
   "engines": {
-    "node": "12.x"
+    "node": ">=12"
   },
   "dependencies": {
     "axios": "^0.19.0"
