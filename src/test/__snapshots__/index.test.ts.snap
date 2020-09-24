@@ -1,0 +1,37 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`local fixture test check for 1.ignore 1`] = `
+Array [
+  "# ignoregen node",
+  "node_modules/",
+  "",
+  "# ignoregen env",
+  ".env*",
+  ".envrc",
+  "!.env.example",
+  "",
+]
+`;
+
+exports[`local fixture test check for 2.ignore 1`] = `
+Array [
+  "dist",
+  "",
+]
+`;
+
+exports[`local fixture test check for 3.ignore 1`] = `
+Array [
+  "# ignoregen env",
+  ".env*",
+  ".envrc",
+  "!.env.example",
+  "",
+  "dist/",
+  "# ignoregen node",
+  "node_modules/",
+  "",
+  ".vscode/",
+  "",
+]
+`;
