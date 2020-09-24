@@ -3,12 +3,12 @@ commit-msg:
     commitlint:
       run: commitlint --edit ./.git/COMMIT_EDITMSG
 
-pre-push:
-  parallel: true
-  commands:
-    packages-audit:
-      tags: frontend security
-      run: yarn audit
+# pre-push:
+#   parallel: true
+#   commands:
+#     packages-audit:
+#       tags: frontend security
+#       run: yarn dlx @efrem/auditdeps
 
 pre-commit:
   parallel: true
@@ -37,4 +37,4 @@ pre-commit:
       tags: infra lint
       files: git diff --name-only --staged
       glob: '.renovaterc'
-      run: npx --package renovate -c 'renovate-config-validator'
+      run: yarn dlx --package renovate renovate-config-validator
