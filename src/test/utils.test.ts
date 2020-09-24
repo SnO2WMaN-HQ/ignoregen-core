@@ -30,17 +30,31 @@ describe('isEmptyLine()', () => {
 });
 
 describe('trimLastEmptyLines()', () => {
+  it('nothing', () => {
+    const actual = trimLastEmptyLines([]);
+    const expected = [] as string[];
+    expect(actual).toStrictEqual(expected);
+  });
+
+  it('empty line only', () => {
+    const actual = trimLastEmptyLines(['']);
+    const expected = [''];
+    expect(actual).toStrictEqual(expected);
+  });
+
   it('no empty line', () => {
     const actual = trimLastEmptyLines(['a']);
     const expected = ['a'];
     expect(actual).toStrictEqual(expected);
   });
+
   it('no change', () => {
     const actual = trimLastEmptyLines(['a', '']);
     const expected = ['a', ''];
     expect(actual).toStrictEqual(expected);
     expect(trimLastEmptyLines(['a', ''])).toStrictEqual(['a', '']);
   });
+
   it('multiple empty lines', () => {
     const actual = trimLastEmptyLines(['a', '', '', '']);
     const expected = ['a', ''];
