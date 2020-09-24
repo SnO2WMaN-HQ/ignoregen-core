@@ -30,10 +30,10 @@
     "test": "jest",
     "test:ci": "jest --ci --runInBand",
     "test:watch": "jest --watch",
-    "lint": "run-s -cn lint:*",
+    "lint": "run-s -cn 'lint:*'",
     "lint:eslint": "eslint . --ext .js,.ts",
     "lint:prettier": "prettier --check **/*.{json,yml,yaml,md}",
-    "fmt": "run-s -cn fmt:*",
+    "fmt": "run-s -cn 'fmt:*'",
     "fmt:eslint": "yarn lint:eslint --fix",
     "fmt:prettier": "yarn lint:prettier --write"
   },
