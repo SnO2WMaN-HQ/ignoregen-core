@@ -1,5 +1,6 @@
 {
   "name": "@ignoregen/core",
+  "version": "1.0.0",
   "license": "MIT",
   "author": {
     "email": "me@sno2wman.dev",
@@ -66,6 +67,5 @@
     "ts-node": "9.0.0",
     "tsconfig-paths": "3.9.0",
     "typescript": "3.9.7"
-  },
-  "version": "1.0.0"
+  }
 }
