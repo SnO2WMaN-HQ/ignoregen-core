@@ -48,6 +48,8 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@semantic-release/release-notes-generator", "virtual:f693d6d974588837e4b2c09258525ea9266ceaac5e92fffdb3fcb3e263d1e1a98a45eadc990a2d5dbc1e2c3fdd99d4eb3ab7f98c20889d5ebb8286c0b271e2e7#npm:9.0.1"],
             ["@shopify/eslint-plugin", "virtual:9b22bc6ec06e1f1d944f2fdf87ffa4dbfef8056b86fb269a56c748cb6c0a588f7589498cde7e011748b54c959a53f91b6eb7d6022ce1ab3eb3b7b5065654ae53#npm:38.0.0"],
             ["@shopify/prettier-config", "npm:1.1.1"],
+            ["@types/jest", "npm:26.0.14"],
+            ["@types/node", "npm:14.11.2"],
             ["axios", "npm:0.19.2"],
             ["axios-mock-adapter", "virtual:9b22bc6ec06e1f1d944f2fdf87ffa4dbfef8056b86fb269a56c748cb6c0a588f7589498cde7e011748b54c959a53f91b6eb7d6022ce1ab3eb3b7b5065654ae53#npm:1.18.2"],
             ["eslint", "npm:7.8.1"],
@@ -768,6 +770,8 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@semantic-release/release-notes-generator", "virtual:f693d6d974588837e4b2c09258525ea9266ceaac5e92fffdb3fcb3e263d1e1a98a45eadc990a2d5dbc1e2c3fdd99d4eb3ab7f98c20889d5ebb8286c0b271e2e7#npm:9.0.1"],
             ["@shopify/eslint-plugin", "virtual:9b22bc6ec06e1f1d944f2fdf87ffa4dbfef8056b86fb269a56c748cb6c0a588f7589498cde7e011748b54c959a53f91b6eb7d6022ce1ab3eb3b7b5065654ae53#npm:38.0.0"],
             ["@shopify/prettier-config", "npm:1.1.1"],
+            ["@types/jest", "npm:26.0.14"],
+            ["@types/node", "npm:14.11.2"],
             ["axios", "npm:0.19.2"],
             ["axios-mock-adapter", "virtual:9b22bc6ec06e1f1d944f2fdf87ffa4dbfef8056b86fb269a56c748cb6c0a588f7589498cde7e011748b54c959a53f91b6eb7d6022ce1ab3eb3b7b5065654ae53#npm:1.18.2"],
             ["eslint", "npm:7.8.1"],
@@ -11794,6 +11798,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["yargs-parser", "npm:18.1.3"]
           ],
           "packagePeers": [
+            "@types/jest",
             "@types/typescript",
             "jest",
             "typescript"

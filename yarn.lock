@@ -608,6 +608,8 @@ __metadata:
     "@semantic-release/release-notes-generator": 9.0.1
     "@shopify/eslint-plugin": 38.0.0
     "@shopify/prettier-config": 1.1.1
+    "@types/jest": ^26.0.14
+    "@types/node": ^14.11.2
     axios: ^0.19.0
     axios-mock-adapter: ^1.18.2
     eslint: 7.8.1
@@ -1357,7 +1359,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/jest@npm:26.x":
+"@types/jest@npm:26.x, @types/jest@npm:^26.0.14":
   version: 26.0.14
   resolution: "@types/jest@npm:26.0.14"
   dependencies:
@@ -1404,7 +1406,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:>= 8":
+"@types/node@npm:>= 8, @types/node@npm:^14.11.2":
   version: 14.11.2
   resolution: "@types/node@npm:14.11.2"
   checksum: 3badcce3991cd8487b549b2541c9a9809f77ded06a2846dd9c73948d12a442290b31abef2d4b0304cc7e30539614ae82ff3b70d93a4b9a82e19128b3d17a9e0f
