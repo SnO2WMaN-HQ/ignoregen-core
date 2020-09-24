@@ -1,8 +1,0 @@
-# ignoregen node
-node_modules/
-
-# ignoregen env
-.env*
-.envrc
-!.env.example
-
