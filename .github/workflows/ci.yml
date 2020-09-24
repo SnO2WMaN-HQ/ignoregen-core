@@ -11,7 +11,7 @@ jobs:
         with:
           node-version: 12
           check-latest: true
-      - run: yarn install --frozen-lockfile
+      - run: yarn install --immutable --immutable-cache --check-cache
       - run: yarn build
 
   lint:
@@ -22,7 +22,7 @@ jobs:
         with:
           node-version: 12
           check-latest: true
-      - run: yarn install --frozen-lockfile
+      - run: yarn install --immutable --immutable-cache --check-cache
       - run: yarn lint
 
   test:
@@ -36,7 +36,7 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
           check-latest: true
-      - run: yarn install --frozen-lockfile
+      - run: yarn install --immutable --immutable-cache --check-cache
       - run: yarn test:ci
       - uses: codecov/codecov-action@v1
         if: ${{ matrix.node }} == 12
