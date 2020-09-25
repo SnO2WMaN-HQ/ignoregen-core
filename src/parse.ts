@@ -1,8 +1,51 @@
 import axios from 'axios';
 import url from 'url';
 import {defaultOption} from './default';
-import {Option} from './types';
-import {cutEmptyLines, trimLastEmptyLines} from './utils';
+import {Option, TemplateBlock} from './types';
+import {cutEmptyLines} from './utils';
+
+function isTemplateBlock(cur: string | TemplateBlock): cur is TemplateBlock {
+  return typeof cur !== 'string';
+}
+
+function isTemplateComment(line: string) {
+  return /^# ignoregen .*$/.test(line);
+}
+
+export function separateBlocks(lines: string[]): (string | TemplateBlock)[] {
+  const rtn: ReturnType<typeof separateBlocks> = [];
+  for (let i = 0; i < lines.length; i++) {
+    const cur = lines[i];
+    if (isTemplateComment(cur)) {
+      const block = lines.slice(i + 1, lines.indexOf('', i));
+      i += block.length + 1;
+      rtn.push({comment: cur, content: block});
+    } else rtn.push(cur);
+  }
+  return rtn;
+}
+
+export function analyzeBlocks(blocks: ReturnType<typeof separateBlocks>) {
+  return Promise.all(
+    blocks.map(async (block) => {
+      if (!isTemplateBlock(block)) return block;
+
+      const parsed = parseComment(block.comment);
+      const templateURL = createTemplateURL(parsed);
+      const template = await fetchTemplate(templateURL);
+      return {...block, content: template} as TemplateBlock;
+    }),
+  );
+}
+
+export function joinBlocks(
+  blocks: ReturnType<typeof separateBlocks>,
+): string[] {
+  return blocks.reduce((pre, cur, i) => {
+    if (isTemplateBlock(cur)) return [...pre, cur.comment, ...cur.content, ''];
+    else return [...pre, cur];
+  }, [] as string[]);
+}
 
 export function parseComment(comment: string): {name: string; option: Option} {
   const [, , name, ...other] = comment.split(' ');
@@ -14,17 +57,6 @@ export function parseComment(comment: string): {name: string; option: Option} {
   };
 
   return {name, option};
-}
-
-export function parseLines(
-  lines: string[],
-): ([string] | [string, ReturnType<typeof parseComment>])[] {
-  return lines.map((line) => {
-    if (/^# ignoregen .*$/.test(line)) {
-      return [line, parseComment(line)];
-    }
-    return [line];
-  });
 }
 
 export function createTemplateURL({
@@ -40,26 +72,6 @@ export async function fetchTemplate(url: string) {
   return cutEmptyLines(data.split('\n'));
 }
 
-export async function extractTemplate([raw, config]: ReturnType<
-  typeof parseLines
->[number]): Promise<string[]> {
-  if (!config) return [raw];
-
-  const templateURL = createTemplateURL(config);
-  return fetchTemplate(templateURL).then((template) => [raw, ...template, '']);
-}
-
-export async function extractTemplates(lines: ReturnType<typeof parseLines>) {
-  const lineed = await Promise.all(
-    lines.map(async (line) => extractTemplate(line)),
-  );
-  return lineed;
-}
-
-export function flatten(lines: string[][]): string[] {
-  return trimLastEmptyLines(lines.flat());
-}
-
 export async function parse(lines: string[]): Promise<string[]> {
-  return extractTemplates(parseLines(lines)).then(flatten);
+  return analyzeBlocks(separateBlocks(lines)).then(joinBlocks);
 }

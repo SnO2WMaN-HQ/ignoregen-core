@@ -8,13 +8,12 @@ import {promisify} from 'util';
 import {parse} from '..';
 import {defaultOption} from '../default';
 import {
+  analyzeBlocks,
   createTemplateURL,
-  extractTemplate,
-  extractTemplates,
   fetchTemplate,
-  flatten,
+  joinBlocks,
   parseComment,
-  parseLines,
+  separateBlocks,
 } from '../parse';
 
 const fixturesPath = path.resolve(__dirname, 'fixtures');
@@ -23,6 +22,200 @@ const templatesPath = path.resolve(fixturesPath, 'templates');
 const axiosMock = new MockAdapter(axios);
 const readdir = promisify(fs.readdir);
 const readFile = promisify(fs.readFile);
+
+describe('separateBlocks()', () => {
+  it('no template', () => {
+    const actual = separateBlocks(['dist/', 'lib/', '']);
+    const expected = ['dist/', 'lib/', ''];
+    expect(actual).toStrictEqual(expected);
+  });
+
+  it('with only template', () => {
+    const actual = separateBlocks([
+      '# ignoregen env',
+      '.env*',
+      '.envrc',
+      '!.env.example',
+      '',
+    ]);
+    const expected = [
+      {
+        comment: '# ignoregen env',
+        content: ['.env*', '.envrc', '!.env.example'],
+      },
+    ];
+    expect(actual).toStrictEqual(expected);
+  });
+
+  it('with multiple template', () => {
+    const actual = separateBlocks([
+      '# ignoregen env',
+      '.env*',
+      '.envrc',
+      '!.env.example',
+      '',
+      '# ignoregen node',
+      'node_modules/',
+      '',
+    ]);
+    const expected = [
+      {
+        comment: '# ignoregen env',
+        content: ['.env*', '.envrc', '!.env.example'],
+      },
+      {
+        comment: '# ignoregen node',
+        content: ['node_modules/'],
+      },
+    ];
+    expect(actual).toStrictEqual(expected);
+  });
+
+  it('complexed', () => {
+    const actual = separateBlocks([
+      '.vscode/',
+      '# ignoregen env',
+      '.env*',
+      '.envrc',
+      '!.env.example',
+      '',
+      'dist/',
+      'lib/',
+      '',
+    ]);
+    const expected = [
+      '.vscode/',
+      {
+        comment: '# ignoregen env',
+        content: ['.env*', '.envrc', '!.env.example'],
+      },
+      'dist/',
+      'lib/',
+      '',
+    ];
+    expect(actual).toStrictEqual(expected);
+  });
+});
+
+describe('joinBlocks()', () => {
+  it('no template', () => {
+    const actual = joinBlocks(['dist/', 'lib/', '']);
+    const expected = ['dist/', 'lib/', ''];
+    expect(actual).toStrictEqual(expected);
+  });
+
+  it('with only template', () => {
+    const actual = joinBlocks([
+      {
+        comment: '# ignoregen env',
+        content: ['.env*', '.envrc', '!.env.example'],
+      },
+    ]);
+    const expected = [
+      '# ignoregen env',
+      '.env*',
+      '.envrc',
+      '!.env.example',
+      '',
+    ];
+    expect(actual).toStrictEqual(expected);
+  });
+
+  it('with multiple templates', () => {
+    const actual = joinBlocks([
+      {
+        comment: '# ignoregen env',
+        content: ['.env*', '.envrc', '!.env.example'],
+      },
+      {
+        comment: '# ignoregen node',
+        content: ['node_modules/'],
+      },
+    ]);
+    const expected = [
+      '# ignoregen env',
+      '.env*',
+      '.envrc',
+      '!.env.example',
+      '',
+      '# ignoregen node',
+      'node_modules/',
+      '',
+    ];
+    expect(actual).toStrictEqual(expected);
+  });
+
+  it('complexed', () => {
+    const actual = joinBlocks([
+      '.vscode/',
+      {
+        comment: '# ignoregen env',
+        content: ['.env*', '.envrc', '!.env.example'],
+      },
+      'dist/',
+      'lib/',
+      '',
+    ]);
+    const expected = [
+      '.vscode/',
+      '# ignoregen env',
+      '.env*',
+      '.envrc',
+      '!.env.example',
+      '',
+      'dist/',
+      'lib/',
+      '',
+    ];
+    expect(actual).toStrictEqual(expected);
+  });
+});
+
+describe('analyzeBlocks()', () => {
+  it('no template', async () => {
+    const actual = await analyzeBlocks(['dist/', 'lib/', '']);
+    const expected = ['dist/', 'lib/', ''];
+    expect(actual).toStrictEqual(expected);
+  });
+
+  describe('axios mocked for local fixture', () => {
+    beforeEach(async () => {
+      const dirents = await (
+        await readdir(templatesPath, {withFileTypes: true})
+      ).filter((dirent) => dirent.isFile());
+
+      for (const {name} of dirents) {
+        const content = await readFile(path.resolve(templatesPath, name), {
+          encoding: 'utf-8',
+        });
+
+        axiosMock.onGet(`${defaultOption.src}${name}`).reply((config) => {
+          return [200, content];
+        });
+      }
+    });
+
+    afterEach(() => {
+      axiosMock.reset();
+    });
+
+    it('with only template', async () => {
+      const actual = await analyzeBlocks([
+        {
+          comment: '# ignoregen env',
+          content: ['.env*'],
+        },
+      ]);
+      const expected = [
+        {
+          comment: '# ignoregen env',
+          content: ['.env*', '.envrc', '!.env.example'],
+        },
+      ];
+      expect(actual).toStrictEqual(expected);
+    });
+  });
+});
 
 describe('parseComment()', () => {
   describe('with no provided option', () => {
@@ -51,47 +244,6 @@ describe('parseComment()', () => {
         option: {src: 'https://example.com/ignores/'},
       });
     });
-  });
-});
-
-describe('parseLines()', () => {
-  it('no template', () => {
-    const actual = parseLines(['dist']);
-    const expected = [['dist']];
-    expect(actual).toStrictEqual(expected);
-  });
-
-  it('missing name template', () => {
-    const actual = parseLines(['# ignoregen']);
-    const expected = [['# ignoregen']];
-    expect(actual).toStrictEqual(expected);
-  });
-
-  it('with empty line', () => {
-    const actual = parseLines(['', '']);
-    const expected = [[''], ['']];
-    expect(actual).toStrictEqual(expected);
-  });
-
-  it('template', () => {
-    const actual = parseLines(['# ignoregen node']);
-    const expected = [
-      ['# ignoregen node', {name: 'node', option: {src: defaultOption.src}}],
-    ];
-    expect(actual).toStrictEqual(expected);
-  });
-
-  it('template with custom option', () => {
-    const actual = parseLines([
-      '# ignoregen node {"src": "https://example.com/ignores/"}',
-    ]);
-    const expected = [
-      [
-        '# ignoregen node {"src": "https://example.com/ignores/"}',
-        {name: 'node', option: {src: 'https://example.com/ignores/'}},
-      ],
-    ];
-    expect(actual).toStrictEqual(expected);
   });
 });
 
@@ -143,167 +295,6 @@ describe('fetchTemplate()', () => {
       );
     });
   });
-
-  afterEach(() => {
-    axiosMock.reset();
-  });
-});
-
-describe('extractTemplate()', () => {
-  afterEach(() => {
-    axiosMock.reset();
-  });
-
-  it('success', async () => {
-    axiosMock
-      .onGet(url.resolve(defaultOption.src, 'node.ignore'))
-      .reply(200, 'node_modules/\n');
-
-    const actual = await extractTemplate([
-      '# ignoregen node',
-      {name: 'node', option: defaultOption},
-    ]);
-    const expected = ['# ignoregen node', 'node_modules/', ''];
-    expect(actual).toStrictEqual(expected);
-  });
-
-  it('failed', async () => {
-    axiosMock.onGet(url.resolve(defaultOption.src, 'node.ignore')).reply(404);
-
-    await expect(async () => {
-      await extractTemplate([
-        '# ignoregen node',
-        {name: 'node', option: defaultOption},
-      ]);
-    }).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Request failed with status code 404"`,
-    );
-  });
-});
-
-describe('extractTemplates()', () => {
-  it('no template', async () => {
-    const actual = await extractTemplates([['dist']]);
-    const expected = [['dist']];
-    expect(actual).toStrictEqual(expected);
-  });
-
-  describe('axios mocked to local templates', () => {
-    beforeEach(async () => {
-      const dirents = await (
-        await readdir(templatesPath, {withFileTypes: true})
-      ).filter((dirent) => dirent.isFile());
-
-      for (const {name} of dirents) {
-        const content = await readFile(path.resolve(templatesPath, name), {
-          encoding: 'utf-8',
-        });
-        axiosMock
-          .onGet(url.resolve(defaultOption.src, name))
-          .reply((config) => {
-            return [200, content];
-          });
-      }
-    });
-
-    afterEach(() => {
-      axiosMock.reset();
-    });
-
-    it('extract one template', async () => {
-      const actual = await extractTemplates([
-        ['# ignoregen node', {name: 'node', option: {src: defaultOption.src}}],
-      ]);
-      const expected = [['# ignoregen node', 'node_modules/', '']];
-      expect(actual).toStrictEqual(expected);
-    });
-
-    it('extract templates', async () => {
-      const actual = await extractTemplates([
-        ['# ignoregen node', {name: 'node', option: defaultOption}],
-        ['# ignoregen env', {name: 'env', option: defaultOption}],
-      ]);
-      const expected = [
-        ['# ignoregen node', 'node_modules/', ''],
-        ['# ignoregen env', '.env*', '.envrc', '!.env.example', ''],
-      ];
-      expect(actual).toStrictEqual(expected);
-    });
-
-    it('extract templates but everything failed', async () => {
-      await expect(async () => {
-        await extractTemplates([
-          ['# ignoregen ?', {name: '?', option: defaultOption}],
-          ['# ignoregen !', {name: '!', option: defaultOption}],
-        ]);
-      }).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Request failed with status code 404"`,
-      );
-    });
-
-    it('extract two templates but one template failed', async () => {
-      await expect(async () => {
-        await extractTemplates([
-          ['# ignoregen ?', {name: '?', option: defaultOption}],
-          ['# ignoregen node', {name: 'node', option: defaultOption}],
-        ]);
-      }).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Request failed with status code 404"`,
-      );
-    });
-  });
-});
-
-describe('flatten()', () => {
-  it('simply flatten', () => {
-    const actual = flatten([
-      ['# ignoregen node', 'node_modules/', ''],
-      ['# ignoregen env', '.env*', '.envrc', '!.env.example', ''],
-      [''],
-    ]);
-    const expected = [
-      '# ignoregen node',
-      'node_modules/',
-      '',
-      '# ignoregen env',
-      '.env*',
-      '.envrc',
-      '!.env.example',
-      '',
-    ];
-    expect(actual).toStrictEqual(expected);
-  });
-
-  it('cut last empty lines', () => {
-    const actual = flatten([
-      ['# ignoregen node', 'node_modules/', ''],
-      ['# ignoregen env', '.env*', '.envrc', '!.env.example', ''],
-      ['', '', ''],
-    ]);
-    const expected = [
-      '# ignoregen node',
-      'node_modules/',
-      '',
-      '# ignoregen env',
-      '.env*',
-      '.envrc',
-      '!.env.example',
-      '',
-    ];
-    expect(actual).toStrictEqual(expected);
-  });
-
-  it('nothing', () => {
-    const actual = flatten([[]]);
-    const expected = [] as string[];
-    expect(actual).toStrictEqual(expected);
-  });
-
-  it('empty line', () => {
-    const actual = flatten([['']]);
-    const expected = [''];
-    expect(actual).toStrictEqual(expected);
-  });
 });
 
 describe('parse()', () => {
@@ -348,7 +339,12 @@ describe('parse()', () => {
     });
 
     it('parse with templates', async () => {
-      const actual = await parse(['# ignoregen node', '# ignoregen env', '']);
+      const actual = await parse([
+        '# ignoregen node',
+        '',
+        '# ignoregen env',
+        '',
+      ]);
       const expected = [
         '# ignoregen node',
         'node_modules/',
