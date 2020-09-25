@@ -11,6 +11,7 @@ import {
   analyzeBlocks,
   createTemplateURL,
   fetchTemplate,
+  isTemplateComment,
   joinBlocks,
   parseComment,
   separateBlocks,
@@ -22,6 +23,22 @@ const templatesPath = path.resolve(fixturesPath, 'templates');
 const axiosMock = new MockAdapter(axios);
 const readdir = promisify(fs.readdir);
 const readFile = promisify(fs.readFile);
+
+describe('isTemplateComment()', () => {
+  it('return true', () => {
+    expect(isTemplateComment('# ignoregen env')).toBe(true);
+    expect(
+      isTemplateComment(
+        `# ignoregen env {"src": "https://example.com/ignores/"}`,
+      ),
+    ).toBe(true);
+  });
+
+  it('return false', () => {
+    expect(isTemplateComment('#ignoregen node')).toBe(false);
+    expect(isTemplateComment('# ignoregen')).toBe(false);
+  });
+});
 
 describe('separateBlocks()', () => {
   it('no template', () => {

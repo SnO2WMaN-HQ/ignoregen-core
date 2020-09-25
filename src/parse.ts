@@ -4,11 +4,13 @@ import {defaultOption} from './default';
 import {Option, TemplateBlock} from './types';
 import {cutEmptyLines} from './utils';
 
-function isTemplateBlock(cur: string | TemplateBlock): cur is TemplateBlock {
+export function isTemplateBlock(
+  cur: string | TemplateBlock,
+): cur is TemplateBlock {
   return typeof cur !== 'string';
 }
 
-function isTemplateComment(line: string) {
+export function isTemplateComment(line: string) {
   return /^# ignoregen .*$/.test(line);
 }
 
