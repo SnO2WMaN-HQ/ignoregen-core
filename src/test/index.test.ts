@@ -35,14 +35,27 @@ describe('local fixture test', () => {
     axiosMock.reset();
   });
 
-  it.each([['1.ignore'], ['2.ignore'], ['3.ignore']])(
+  describe.each([['1.ignore'], ['2.ignore'], ['3.ignore']])(
     'check for %s',
-    async (targetFile) => {
-      const target = (
-        await readFile(path.resolve(fixturesPath, targetFile), 'utf-8')
-      ).split('\n');
+    (targetFile) => {
+      it('match snapshot', async () => {
+        const target = (
+          await readFile(path.resolve(fixturesPath, targetFile), 'utf-8')
+        ).split('\n');
 
-      expect(await parse(target)).toMatchSnapshot();
+        expect(await parse(target)).toMatchSnapshot();
+      });
+
+      it('parse twice', async () => {
+        const target = (
+          await readFile(path.resolve(fixturesPath, targetFile), 'utf-8')
+        ).split('\n');
+
+        const once = await parse(target);
+        const twice = await parse(once);
+
+        expect(once).toStrictEqual(twice);
+      });
     },
   );
 });
