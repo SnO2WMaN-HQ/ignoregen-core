@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`local fixture test check for 1.ignore match snapshot 1`] = `
+exports[`local fixture test for 1.ignore (success) match snapshot 1`] = `
 Array [
   "# ignoregen node",
   "node_modules/",
@@ -13,14 +13,14 @@ Array [
 ]
 `;
 
-exports[`local fixture test check for 2.ignore match snapshot 1`] = `
+exports[`local fixture test for 2.ignore (success) match snapshot 1`] = `
 Array [
   "dist",
   "",
 ]
 `;
 
-exports[`local fixture test check for 3.ignore match snapshot 1`] = `
+exports[`local fixture test for 3.ignore (success) match snapshot 1`] = `
 Array [
   "# ignoregen env",
   ".env*",
@@ -34,5 +34,11 @@ Array [
   "",
   ".vscode/",
   "",
+]
+`;
+
+exports[`local fixture test for not-exist-template.ignore (failed) throw errors array 1`] = `
+Array [
+  [Error: Failed to fetch template from "https://raw.githubusercontent.com/SnO2WMaN-HQ/ignoregen-template/master/templates/?.ignore" for "# ignoregen ?"],
 ]
 `;

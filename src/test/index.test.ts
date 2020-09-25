@@ -36,7 +36,7 @@ describe('local fixture test', () => {
   });
 
   describe.each([['1.ignore'], ['2.ignore'], ['3.ignore']])(
-    'check for %s',
+    'for %s (success)',
     (targetFile) => {
       it('match snapshot', async () => {
         const target = (
@@ -51,10 +51,23 @@ describe('local fixture test', () => {
           await readFile(path.resolve(fixturesPath, targetFile), 'utf-8')
         ).split('\n');
 
-        const once = await parse(target);
+        const once = (await parse(target)) as string[];
         const twice = await parse(once);
 
         expect(once).toStrictEqual(twice);
+      });
+    },
+  );
+
+  describe.each([['not-exist-template.ignore']])(
+    'for %s (failed)',
+    (targetFile) => {
+      it('throw errors array', async () => {
+        const target = (
+          await readFile(path.resolve(fixturesPath, targetFile), 'utf-8')
+        ).split('\n');
+
+        expect(await parse(target)).toMatchSnapshot();
       });
     },
   );

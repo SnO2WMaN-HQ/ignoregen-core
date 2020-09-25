@@ -5,5 +5,5 @@ export interface Option {
 export interface TemplateBlock {
   comment: string;
   content: string[];
-  error?: any;
+  error?: string;
 }

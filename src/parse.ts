@@ -33,16 +33,30 @@ export function analyzeBlocks(blocks: ReturnType<typeof separateBlocks>) {
       if (!isTemplateBlock(block)) return block;
 
       const parsed = parseComment(block.comment);
+
       const templateURL = createTemplateURL(parsed);
-      const template = await fetchTemplate(templateURL);
-      return {...block, content: template} as TemplateBlock;
+
+      return fetchTemplate(templateURL)
+        .then((template) => ({
+          ...block,
+          content: template,
+        }))
+        .catch(() => ({
+          ...block,
+          error: `Failed to fetch template from "${templateURL}" for "${block.comment}"`,
+        }));
     }),
   );
 }
 
-export function joinBlocks(
-  blocks: ReturnType<typeof separateBlocks>,
-): string[] {
+export function joinBlocks(blocks: ReturnType<typeof separateBlocks>) {
+  const errors = blocks
+    .filter(isTemplateBlock)
+    .filter(({error}) => Boolean(error)) as Required<TemplateBlock>[];
+  if (errors.length) {
+    return errors.map(({error}) => new Error(error));
+  }
+
   return blocks.reduce((pre, cur, i) => {
     if (isTemplateBlock(cur)) return [...pre, cur.comment, ...cur.content, ''];
     else return [...pre, cur];
@@ -68,12 +82,12 @@ export function createTemplateURL({
   return url.resolve(src, `${name}.ignore`);
 }
 
-export async function fetchTemplate(url: string) {
-  const {data, status, statusText} = await axios.get<string>(url);
-  if (status >= 400) throw new Error(statusText);
-  return cutEmptyLines(data.split('\n'));
+export function fetchTemplate(url: string) {
+  return axios
+    .get<string>(url)
+    .then(({data}) => cutEmptyLines(data.split('\n')));
 }
 
-export async function parse(lines: string[]): Promise<string[]> {
+export async function parse(lines: string[]) {
   return analyzeBlocks(separateBlocks(lines)).then(joinBlocks);
 }

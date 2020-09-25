@@ -1,4 +1,3 @@
-/* eslint-disable @shopify/jest/no-snapshots */
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
 import * as fs from 'fs';
@@ -41,6 +40,12 @@ describe('isTemplateComment()', () => {
 });
 
 describe('separateBlocks()', () => {
+  it('empty line', () => {
+    const actual = separateBlocks(['']);
+    const expected = [''];
+    expect(actual).toStrictEqual(expected);
+  });
+
   it('no template', () => {
     const actual = separateBlocks(['dist/', 'lib/', '']);
     const expected = ['dist/', 'lib/', ''];
@@ -186,6 +191,29 @@ describe('joinBlocks()', () => {
     ];
     expect(actual).toStrictEqual(expected);
   });
+
+  it('throw errors', () => {
+    const given = joinBlocks([
+      {
+        comment: '# ignoregen ?',
+        content: ['?'],
+        error: `Failed to fetch template from "https://raw.githubusercontent.com/SnO2WMaN-HQ/ignoregen-template/master/templates/?.ignore" for "# ignoregen ?"`,
+      },
+      {
+        comment: '# ignoregen !',
+        content: ['!'],
+        error: `Failed to fetch template from "https://raw.githubusercontent.com/SnO2WMaN-HQ/ignoregen-template/master/templates/!.ignore" for "# ignoregen !"`,
+      },
+    ]);
+    expect(given).toStrictEqual([
+      new Error(
+        `Failed to fetch template from "https://raw.githubusercontent.com/SnO2WMaN-HQ/ignoregen-template/master/templates/?.ignore" for "# ignoregen ?"`,
+      ),
+      new Error(
+        `Failed to fetch template from "https://raw.githubusercontent.com/SnO2WMaN-HQ/ignoregen-template/master/templates/!.ignore" for "# ignoregen !"`,
+      ),
+    ]);
+  });
 });
 
 describe('analyzeBlocks()', () => {
@@ -227,6 +255,49 @@ describe('analyzeBlocks()', () => {
         {
           comment: '# ignoregen env',
           content: ['.env*', '.envrc', '!.env.example'],
+        },
+      ];
+      expect(actual).toStrictEqual(expected);
+    });
+
+    it('not-exist template', async () => {
+      const actual = await analyzeBlocks([
+        {
+          comment: '# ignoregen ?',
+          content: ['?'],
+        },
+      ]);
+      const expected = [
+        {
+          comment: '# ignoregen ?',
+          content: ['?'],
+          error: `Failed to fetch template from "https://raw.githubusercontent.com/SnO2WMaN-HQ/ignoregen-template/master/templates/?.ignore" for "# ignoregen ?"`,
+        },
+      ];
+      expect(actual).toStrictEqual(expected);
+    });
+
+    it('not-exist templates', async () => {
+      const actual = await analyzeBlocks([
+        {
+          comment: '# ignoregen ?',
+          content: ['?'],
+        },
+        {
+          comment: '# ignoregen !',
+          content: ['!'],
+        },
+      ]);
+      const expected = [
+        {
+          comment: '# ignoregen ?',
+          content: ['?'],
+          error: `Failed to fetch template from "https://raw.githubusercontent.com/SnO2WMaN-HQ/ignoregen-template/master/templates/?.ignore" for "# ignoregen ?"`,
+        },
+        {
+          comment: '# ignoregen !',
+          content: ['!'],
+          error: `Failed to fetch template from "https://raw.githubusercontent.com/SnO2WMaN-HQ/ignoregen-template/master/templates/!.ignore" for "# ignoregen !"`,
         },
       ];
       expect(actual).toStrictEqual(expected);
@@ -304,14 +375,27 @@ describe('fetchTemplate()', () => {
       expect(actual).toStrictEqual(['.env*', '.envrc', '!.env.example']);
     });
 
-    it('fetch not existed file 404', async () => {
+    it('fetch not-exist template', async () => {
       await expect(async () => {
         await fetchTemplate(url.resolve(defaultOption.src, '?.ignore'));
-      }).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Request failed with status code 404"`,
-      );
+      }).rejects.toThrow(`404`);
     });
   });
+
+  afterEach(() => {
+    axiosMock.reset();
+  });
+
+  it.each([[400], [401], [402], [403], [404]])(
+    'fetch not existed file %i',
+    async (status) => {
+      axiosMock.onGet().reply(status);
+
+      await expect(async () => {
+        await fetchTemplate(url.resolve(defaultOption.src, '?.ignore'));
+      }).rejects.toThrow(`${status}`);
+    },
+  );
 });
 
 describe('parse()', () => {
@@ -373,6 +457,25 @@ describe('parse()', () => {
         '',
       ];
       expect(actual).toStrictEqual(expected);
+    });
+
+    it('fetch not-exist template', async () => {
+      const actual = await parse([
+        '# ignoregen ?',
+        '',
+        '# ignoregen !',
+        '',
+        '# ignoregen node',
+        '',
+      ]);
+      await expect(actual).toStrictEqual([
+        new Error(
+          `Failed to fetch template from "https://raw.githubusercontent.com/SnO2WMaN-HQ/ignoregen-template/master/templates/?.ignore" for "# ignoregen ?"`,
+        ),
+        new Error(
+          `Failed to fetch template from "https://raw.githubusercontent.com/SnO2WMaN-HQ/ignoregen-template/master/templates/!.ignore" for "# ignoregen !"`,
+        ),
+      ]);
     });
   });
 });
