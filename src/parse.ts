@@ -1,8 +1,13 @@
 import axios from 'axios';
 import url from 'url';
-import {defaultOption} from './default';
-import {Option, TemplateBlock} from './types';
+import {Option, parseOption} from './option';
 import {cutEmptyLines} from './utils';
+
+export interface TemplateBlock {
+  comment: string;
+  content: string[];
+  error?: string;
+}
 
 export function isTemplateBlock(
   cur: string | TemplateBlock,
@@ -27,12 +32,15 @@ export function separateBlocks(lines: string[]): (string | TemplateBlock)[] {
   return rtn;
 }
 
-export function analyzeBlocks(blocks: ReturnType<typeof separateBlocks>) {
+export function analyzeBlocks(
+  blocks: ReturnType<typeof separateBlocks>,
+  rcOption: Partial<Option>,
+) {
   return Promise.all(
     blocks.map(async (block) => {
       if (!isTemplateBlock(block)) return block;
 
-      const parsed = parseComment(block.comment);
+      const parsed = parseComment(block.comment, rcOption);
 
       const templateURL = createTemplateURL(parsed);
 
@@ -63,14 +71,14 @@ export function joinBlocks(blocks: ReturnType<typeof separateBlocks>) {
   }, [] as string[]);
 }
 
-export function parseComment(comment: string): {name: string; option: Option} {
+export function parseComment(
+  comment: string,
+  rcOption: Partial<Option>,
+): {name: string; option: Option} {
   const [, , name, ...other] = comment.split(' ');
 
   const optionRaw = other.join('');
-  const option: Option = {
-    ...defaultOption,
-    ...JSON.parse(optionRaw || '{}'),
-  };
+  const option = parseOption(rcOption, JSON.parse(optionRaw || '{}'));
 
   return {name, option};
 }
@@ -88,6 +96,6 @@ export function fetchTemplate(url: string) {
     .then(({data}) => cutEmptyLines(data.split('\n')));
 }
 
-export async function parse(lines: string[]) {
-  return analyzeBlocks(separateBlocks(lines)).then(joinBlocks);
+export async function parse(lines: string[], rcOption: Partial<Option>) {
+  return analyzeBlocks(separateBlocks(lines), rcOption).then(joinBlocks);
 }

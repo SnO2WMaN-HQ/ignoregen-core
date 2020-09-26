@@ -5,7 +5,7 @@ import path from 'path';
 import url from 'url';
 import {promisify} from 'util';
 import {parse} from '..';
-import {defaultOption} from '../default';
+import {defaultOption} from '../option';
 import {
   analyzeBlocks,
   createTemplateURL,
@@ -217,98 +217,109 @@ describe('joinBlocks()', () => {
 });
 
 describe('analyzeBlocks()', () => {
-  it('no template', async () => {
-    const actual = await analyzeBlocks(['dist/', 'lib/', '']);
-    const expected = ['dist/', 'lib/', ''];
-    expect(actual).toStrictEqual(expected);
-  });
-
-  describe('axios mocked for local fixture', () => {
-    beforeEach(async () => {
-      const dirents = await (
-        await readdir(templatesPath, {withFileTypes: true})
-      ).filter((dirent) => dirent.isFile());
-
-      for (const {name} of dirents) {
-        const content = await readFile(path.resolve(templatesPath, name), {
-          encoding: 'utf-8',
-        });
-
-        axiosMock.onGet(`${defaultOption.src}${name}`).reply((config) => {
-          return [200, content];
-        });
-      }
-    });
-
-    afterEach(() => {
-      axiosMock.reset();
-    });
-
-    it('with only template', async () => {
-      const actual = await analyzeBlocks([
-        {
-          comment: '# ignoregen env',
-          content: ['.env*'],
-        },
-      ]);
-      const expected = [
-        {
-          comment: '# ignoregen env',
-          content: ['.env*', '.envrc', '!.env.example'],
-        },
-      ];
+  describe('empty rc option', () => {
+    it('no template', async () => {
+      const actual = await analyzeBlocks(['dist/', 'lib/', ''], {});
+      const expected = ['dist/', 'lib/', ''];
       expect(actual).toStrictEqual(expected);
     });
 
-    it('not-exist template', async () => {
-      const actual = await analyzeBlocks([
-        {
-          comment: '# ignoregen ?',
-          content: ['?'],
-        },
-      ]);
-      const expected = [
-        {
-          comment: '# ignoregen ?',
-          content: ['?'],
-          error: `Failed to fetch template from "https://raw.githubusercontent.com/SnO2WMaN-HQ/ignoregen-template/master/templates/?.ignore" for "# ignoregen ?"`,
-        },
-      ];
-      expect(actual).toStrictEqual(expected);
-    });
+    describe('axios mocked for local fixture', () => {
+      beforeEach(async () => {
+        const dirents = await (
+          await readdir(templatesPath, {withFileTypes: true})
+        ).filter((dirent) => dirent.isFile());
 
-    it('not-exist templates', async () => {
-      const actual = await analyzeBlocks([
-        {
-          comment: '# ignoregen ?',
-          content: ['?'],
-        },
-        {
-          comment: '# ignoregen !',
-          content: ['!'],
-        },
-      ]);
-      const expected = [
-        {
-          comment: '# ignoregen ?',
-          content: ['?'],
-          error: `Failed to fetch template from "https://raw.githubusercontent.com/SnO2WMaN-HQ/ignoregen-template/master/templates/?.ignore" for "# ignoregen ?"`,
-        },
-        {
-          comment: '# ignoregen !',
-          content: ['!'],
-          error: `Failed to fetch template from "https://raw.githubusercontent.com/SnO2WMaN-HQ/ignoregen-template/master/templates/!.ignore" for "# ignoregen !"`,
-        },
-      ];
-      expect(actual).toStrictEqual(expected);
+        for (const {name} of dirents) {
+          const content = await readFile(path.resolve(templatesPath, name), {
+            encoding: 'utf-8',
+          });
+
+          axiosMock.onGet(`${defaultOption.src}${name}`).reply((config) => {
+            return [200, content];
+          });
+        }
+      });
+
+      afterEach(() => {
+        axiosMock.reset();
+      });
+
+      it('with only template', async () => {
+        const actual = await analyzeBlocks(
+          [
+            {
+              comment: '# ignoregen env',
+              content: ['.env*'],
+            },
+          ],
+          {},
+        );
+        const expected = [
+          {
+            comment: '# ignoregen env',
+            content: ['.env*', '.envrc', '!.env.example'],
+          },
+        ];
+        expect(actual).toStrictEqual(expected);
+      });
+
+      it('not-exist template', async () => {
+        const actual = await analyzeBlocks(
+          [
+            {
+              comment: '# ignoregen ?',
+              content: ['?'],
+            },
+          ],
+          {},
+        );
+        const expected = [
+          {
+            comment: '# ignoregen ?',
+            content: ['?'],
+            error: `Failed to fetch template from "https://raw.githubusercontent.com/SnO2WMaN-HQ/ignoregen-template/master/templates/?.ignore" for "# ignoregen ?"`,
+          },
+        ];
+        expect(actual).toStrictEqual(expected);
+      });
+
+      it('not-exist templates', async () => {
+        const actual = await analyzeBlocks(
+          [
+            {
+              comment: '# ignoregen ?',
+              content: ['?'],
+            },
+            {
+              comment: '# ignoregen !',
+              content: ['!'],
+            },
+          ],
+          {},
+        );
+        const expected = [
+          {
+            comment: '# ignoregen ?',
+            content: ['?'],
+            error: `Failed to fetch template from "https://raw.githubusercontent.com/SnO2WMaN-HQ/ignoregen-template/master/templates/?.ignore" for "# ignoregen ?"`,
+          },
+          {
+            comment: '# ignoregen !',
+            content: ['!'],
+            error: `Failed to fetch template from "https://raw.githubusercontent.com/SnO2WMaN-HQ/ignoregen-template/master/templates/!.ignore" for "# ignoregen !"`,
+          },
+        ];
+        expect(actual).toStrictEqual(expected);
+      });
     });
   });
 });
 
 describe('parseComment()', () => {
-  describe('with no provided option', () => {
+  describe('empty rc option', () => {
     it('no option', () => {
-      const actual = parseComment('# ignoregen env');
+      const actual = parseComment('# ignoregen env', {});
       expect(actual).toStrictEqual({
         name: 'env',
         option: {src: defaultOption.src},
@@ -316,7 +327,7 @@ describe('parseComment()', () => {
     });
 
     it('empty option', () => {
-      const actual = parseComment('# ignoregen env {}');
+      const actual = parseComment('# ignoregen env {}', {});
       expect(actual).toStrictEqual({
         name: 'env',
         option: {src: defaultOption.src},
@@ -326,6 +337,7 @@ describe('parseComment()', () => {
     it('src override', () => {
       const actual = parseComment(
         '# ignoregen env {"src": "https://example.com/ignores/"}',
+        {},
       );
       expect(actual).toStrictEqual({
         name: 'env',
@@ -400,13 +412,13 @@ describe('fetchTemplate()', () => {
 
 describe('parse()', () => {
   it('nothing', async () => {
-    const actual = await parse([]);
+    const actual = await parse([], {});
     const expected = [] as string[];
     expect(actual).toStrictEqual(expected);
   });
 
   it('empty line', async () => {
-    const actual = await parse(['']);
+    const actual = await parse([''], {});
     const expected = [''];
     expect(actual).toStrictEqual(expected);
   });
@@ -434,18 +446,16 @@ describe('parse()', () => {
     });
 
     it('parse with no templates', async () => {
-      const actual = await parse(['dist']);
+      const actual = await parse(['dist'], {});
       const expected = ['dist'];
       expect(actual).toStrictEqual(expected);
     });
 
     it('parse with templates', async () => {
-      const actual = await parse([
-        '# ignoregen node',
-        '',
-        '# ignoregen env',
-        '',
-      ]);
+      const actual = await parse(
+        ['# ignoregen node', '', '# ignoregen env', ''],
+        {},
+      );
       const expected = [
         '# ignoregen node',
         'node_modules/',
@@ -460,14 +470,10 @@ describe('parse()', () => {
     });
 
     it('fetch not-exist template', async () => {
-      const actual = await parse([
-        '# ignoregen ?',
-        '',
-        '# ignoregen !',
-        '',
-        '# ignoregen node',
-        '',
-      ]);
+      const actual = await parse(
+        ['# ignoregen ?', '', '# ignoregen !', '', '# ignoregen node', ''],
+        {},
+      );
       await expect(actual).toStrictEqual([
         new Error(
           `Failed to fetch template from "https://raw.githubusercontent.com/SnO2WMaN-HQ/ignoregen-template/master/templates/?.ignore" for "# ignoregen ?"`,

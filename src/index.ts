@@ -1,2 +1,2 @@
-export * from './default';
+export {defaultOption} from './option';
 export {parse} from './parse';

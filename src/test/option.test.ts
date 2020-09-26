@@ -1,15 +1,18 @@
 import {defaultOption, parseOption} from '../option';
 
 describe('parseOption()', () => {
-  it('no rc option and comment option', () => {
-    expect(parseOption()).toStrictEqual(defaultOption);
+  it('empty rc option and comment option', () => {
+    expect(parseOption({}, {})).toStrictEqual(defaultOption);
   });
 
-  it('give rc option, no comment option', () => {
+  it('give rc option, empty comment option', () => {
     expect(
-      parseOption({
-        src: 'https://example.com/templates/',
-      }),
+      parseOption(
+        {
+          src: 'https://example.com/templates/',
+        },
+        {},
+      ),
     ).toStrictEqual({
       src: 'https://example.com/templates/',
     });

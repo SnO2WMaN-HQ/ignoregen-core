@@ -6,7 +6,7 @@ import path from 'path';
 import url from 'url';
 import {promisify} from 'util';
 import {parse} from '..';
-import {defaultOption} from '../default';
+import {defaultOption} from '../option';
 
 const axiosMock = new MockAdapter(axios);
 
@@ -43,7 +43,7 @@ describe('local fixture test', () => {
           await readFile(path.resolve(fixturesPath, targetFile), 'utf-8')
         ).split('\n');
 
-        expect(await parse(target)).toMatchSnapshot();
+        expect(await parse(target, {})).toMatchSnapshot();
       });
 
       it('parse twice', async () => {
@@ -51,8 +51,8 @@ describe('local fixture test', () => {
           await readFile(path.resolve(fixturesPath, targetFile), 'utf-8')
         ).split('\n');
 
-        const once = (await parse(target)) as string[];
-        const twice = await parse(once);
+        const once = (await parse(target, {})) as string[];
+        const twice = await parse(once, {});
 
         expect(once).toStrictEqual(twice);
       });
@@ -67,7 +67,7 @@ describe('local fixture test', () => {
           await readFile(path.resolve(fixturesPath, targetFile), 'utf-8')
         ).split('\n');
 
-        expect(await parse(target)).toMatchSnapshot();
+        expect(await parse(target, {})).toMatchSnapshot();
       });
     },
   );

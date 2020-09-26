@@ -7,10 +7,13 @@ export const defaultOption: Option = {
     'https://raw.githubusercontent.com/SnO2WMaN-HQ/ignoregen-template/master/templates/',
 };
 
-export function parseOption(rcOption?: Option, commentOption?: Option) {
+export function parseOption(
+  rcOption: Partial<Option>,
+  commentOption: Partial<Option>,
+) {
   return {
     ...defaultOption,
-    ...(rcOption || {}),
-    ...(commentOption || {}),
+    ...rcOption,
+    ...commentOption,
   };
 }
