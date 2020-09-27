@@ -1,3 +1,10 @@
+## [1.2.1](https://github.com/SnO2WMaN-HQ/ignoregen-core/compare/v1.2.0...v1.2.1) (2020-09-27)
+
+
+### Bug Fixes
+
+* :bug: Optionの型を出力していなかったのを修正 ([36190f8](https://github.com/SnO2WMaN-HQ/ignoregen-core/commit/36190f83b9231060794b08a2e808368beabba00c))
+
 # [1.2.0](https://github.com/SnO2WMaN-HQ/ignoregen-core/compare/v1.1.1...v1.2.0) (2020-09-27)
 
 
