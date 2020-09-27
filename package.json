@@ -35,7 +35,8 @@
     "lint:prettier": "prettier --check **/*.{json,yml,yaml,md}",
     "fmt": "run-s -cn fmt:*",
     "fmt:eslint": "yarn lint:eslint --fix",
-    "fmt:prettier": "yarn lint:prettier --write"
+    "fmt:prettier": "yarn lint:prettier --write",
+    "tscheck": "tsc --noEmit"
   },
   "engines": {
     "node": ">=12"

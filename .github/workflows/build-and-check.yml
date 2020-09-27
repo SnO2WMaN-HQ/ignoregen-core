@@ -8,10 +8,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2-beta
+      - uses: actions/setup-node@v1
         with:
           node-version: 12
-          check-latest: true
       - run: yarn install --frozen-lockfile
       - run: yarn build
 
@@ -20,25 +19,34 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2-beta
+      - uses: actions/setup-node@v1
         with:
           node-version: 12
-          check-latest: true
       - run: yarn install --frozen-lockfile
       - run: yarn lint
 
+  tsc:
+    name: TypeScript Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 12
+      - run: yarn install --frozen-lockfile
+      - run: yarn tscheck
+
   test:
-    name: Test
+    name: Test on Node.js v${{ matrix.node }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
         node: [12, 14]
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2-beta
+      - uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node }}
-          check-latest: true
       - run: yarn install --frozen-lockfile
       - run: yarn test:ci
       - uses: codecov/codecov-action@v1
