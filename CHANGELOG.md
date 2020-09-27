@@ -1,3 +1,11 @@
+# [1.2.0](https://github.com/SnO2WMaN-HQ/ignoregen-core/compare/v1.1.1...v1.2.0) (2020-09-27)
+
+
+### Features
+
+* :sparkles: 設定ファイルからのオプションを渡せるように ([244f876](https://github.com/SnO2WMaN-HQ/ignoregen-core/commit/244f876fbad58aa3076f3f69db026bf3e1a21db0))
+* :sparkles: 設定ファイルなどからオプションを扱うための関数を用意 ([b33a767](https://github.com/SnO2WMaN-HQ/ignoregen-core/commit/b33a767cac14177c0c57b2cc6de4cb5b264acbaf))
+
 # [1.1.0](https://github.com/SnO2WMaN-HQ/ignoregen-core/compare/v1.0.0...v1.1.0) (2020-09-25)
 
 
