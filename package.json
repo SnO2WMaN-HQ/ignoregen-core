@@ -35,7 +35,8 @@
     "lint:prettier": "prettier --check **/*.{json,yml,yaml,md}",
     "fmt": "run-s -cn fmt:*",
     "fmt:eslint": "yarn lint:eslint --fix",
-    "fmt:prettier": "yarn lint:prettier --write"
+    "fmt:prettier": "yarn lint:prettier --write",
+    "tscheck": "tsc --noEmit"
   },
   "engines": {
     "node": ">=12"
@@ -68,6 +69,6 @@
     "ts-jest": "26.3.0",
     "ts-node": "9.0.0",
     "tsconfig-paths": "3.9.0",
-    "typescript": "3.9.7"
+    "typescript": "4.0.3"
   }
 }
