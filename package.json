@@ -54,7 +54,7 @@
     "@semantic-release/github": "7.1.1",
     "@semantic-release/npm": "7.0.6",
     "@semantic-release/release-notes-generator": "9.0.1",
-    "@shopify/eslint-plugin": "38.0.0",
+    "@shopify/eslint-plugin": "40.2.1",
     "@shopify/prettier-config": "1.1.1",
     "@types/jest": "26.0.22",
     "@types/node": "14.14.27",
